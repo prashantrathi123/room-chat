@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Hello world</title>
+   
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+                body {
+                    margin: 0;
+                    font-family: sans-serif;
+                }
+.box{
+border:solid 1px;
+
+
+border-radius: 5px;
+background-color: #f2f2f2;
+
+
+max-width: 800px;
+     margin: auto;
+     margin-top:80px;
+     margin-bottom:80px;
+    -ms-flex: 60%; /* IE10 */
+    flex: 60%;
+    
+    padding: 60px;
+
+}
+.box input[type=text],input[type=password], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.box input[type=submit] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.box input[type=submit]:hover {
+  background-color: #45a049;
+}
+.box button {
+                     width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+                }
+#navbar{
+background-color:#4CAF50;
+padding-top:8px;
+padding-bottom:8px;
+overflow:hidden;
+border-radius: 0.25rem;
+}
+#navbar a{
+width: 6rem;
+                    background-color: #4CAF50;
+                    color: white;
+                    border: none;
+                    padding: 0.5rem;
+                    cursor: pointer;
+                    border-radius: 0.25rem;
+                    text-transform: uppercase;
+text-decoration:none;
+}
+#navbar a:hover{
+background-color: #166d01;
+}
+#mynav{display:none;
+background-color:#4CAF50;
+margin-top:2px;
+color:white;
+border-style:10px solid;
+}
+
+
+                form {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    display: flex;
+                    box-sizing: border-box;
+                    padding: 0.25rem;
+                }
+
+                form input {
+                    border: 0;
+                    padding: 0.5rem;
+                    width: 100%;
+                    outline: 0;
+                    margin-right: 0.5rem;
+                    border-radius: 0.25rem;
+                    background: #ccc;
+                }
+
+                form button {
+                    width: 6rem;
+                    background-color: #1b8c00;
+                    color: white;
+                    border: none;
+                    padding: 0.5rem;
+                    cursor: pointer;
+                    border-radius: 0.25rem;
+                    text-transform: uppercase;
+                }
+
+                form button:hover {
+                    background-color: #166d01;
+                }
+
+                #message-container {
+                    margin: 0;
+                    padding: 0;
+                    margin-bottom: 3rem;
+                }
+
+                #messageli {
+                    padding: 0.5rem;
+                    background: #eee;
+                    margin-top:2px;
+                    margin-bottom:1px;
+                }
+
+                .messages li:nth-child(odd) {
+                    background: #eee;
+                   
+                }
+            </style>
+ </head>  
+   <script src = "/socket.io/socket.io.js"></script>
+   <script>
+      var socket = io();
+      function setUsername() {
+          
+         socket.emit('setUsername', {name:document.getElementById('name').value, id:document.getElementById('room').value });
+      };
+      var user;
+      var person=" ";
+      var online=" ";
+      socket.on('userExists', function(data) {
+         document.getElementById('error-container').innerHTML = data;
+      });
+      socket.on('userSet', function(data) {
+         user = data.username.name;
+         room=data.username.id;
+        
+         document.body.innerHTML = '<div style="position:sticky;top:0px;width:100%;overflow:hidden;background-color:white;"><div id="navbar" ><a href="javascript:void(0);" onclick="myFunction()" id="user" > </a></div><div id="mynav"></div></div></div><div><form id="form"><input type = "text" id = "message">\
+         <button type = "button" name = "button" onclick = "sendMessage()">Send</button>\
+         </form></div>\
+         <div id = "message-container"></div>';
+      });
+      socket.on('person',function(data){
+          online=data.length;
+          document.getElementById('user').innerHTML=data.length+' user online';
+          var x=" ";
+          for(var i=0;i<data.length;i++)
+          { 
+             x=x+data[i]+'<br>';
+                } person=person+x;document.getElementById('mynav').innerHTML=x;
+         });
+      function sendMessage() {
+         var msg = document.getElementById('message').value;
+         document.getElementById('form').innerHTML='<input type = "text" id = "message"><button type = "button" name = "button" onclick = "sendMessage()">Send</button>'
+         if(msg) {
+            socket.emit('msg', {message: msg, sender: user,reciever:room});
+         }
+      }
+      socket.on('newmsg', function(data) {
+         if(user) {
+         var d = new Date();var h = d.getHours();var m = d.getMinutes();var hh;var tm;
+            if(h>12)
+             {hh=h-12;tm='pm';}
+            else{hh=h;tm='am';}
+            document.getElementById('message-container').innerHTML += '<div id="messageli"><b>' + 
+               data.data.sender + '</b>: '+ hh +':'+ m + tm +'<br>' + data.data.message + '</div>'
+               window.scrollTo(0, document.body.scrollHeight);
+         }
+      })
+function myFunction() {
+var xx = document.getElementById("mynav");
+if(xx.style.display=="block")
+{xx.style.display="none";}
+else{xx.style.display="block";}
+}
+   </script>
+   
+   <body>
+      <div id = "error-container">Room chat by Prashant Rathi</div>
+      <div class="box">
+      <input id = "name" type = "text" name = "name" value = "" 
+         placeholder = "Enter your name!">
+      <input type="text" name="room" placeholder="roomid" id="room">
+      <button type = "button" name = "button" onclick = "setUsername()">
+         Let me chat!
+      </button></div>
+   </body>
+</html>
